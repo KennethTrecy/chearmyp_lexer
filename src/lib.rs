@@ -6,12 +6,8 @@ extern crate alloc;
 #[macro_use]
 mod test_macros;
 
-/// Contains the data structure returned by the main lexer.
-mod token_queue;
-
-/// Contains the data structures and type aliases used and/or returned by some lexers. They can be
-/// used by both lexers and parsers.
-mod token;
+/// Contains the type alias used and/or returned by some lexers.
+mod token_info;
 
 /// Contains the data structures and type aliases used and/or returned by most lexers. They can be
 /// used by lexers only.
