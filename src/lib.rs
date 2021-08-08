@@ -65,7 +65,6 @@ pub use attacher::attacher;
 pub use line_othertongue::line_othertongue;
 pub use block_othertongue::block_othertongue;
 pub use any::any;
-pub use token::Token;
 pub use raw_token::RawToken;
-pub use token_queue::TokenQueue;
+pub use token_info::TokenInfo;
 pub use lex::lex;
