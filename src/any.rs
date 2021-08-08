@@ -113,76 +113,76 @@ where
 	}
 }
 
-#[cfg(test)]
-mod t {
-	use alloc::vec::Vec;
-	use super::{Token, any};
+// #[cfg(test)]
+// mod t {
+// 	use alloc::vec::Vec;
+// 	use super::{Token, any};
 
-	macro_rules! test_any {
-		($sample:literal $expected_info:expr) => {
-			test_any!{
-				sample: $sample,
-				tab_count: 0,
-				info: $expected_info
-			}
-		};
-		(
-			sample: $sample:expr,
-			tab_count: $tab_count:literal,
-			info: $expected_info:expr
-		) => {
-			let info = any(
-				$sample,
-				0,
-				$tab_count
-			);
-			assert_eq!(info, $expected_info);
-		};
-	}
+// 	macro_rules! test_any {
+// 		($sample:literal $expected_info:expr) => {
+// 			test_any!{
+// 				sample: $sample,
+// 				tab_count: 0,
+// 				info: $expected_info
+// 			}
+// 		};
+// 		(
+// 			sample: $sample:expr,
+// 			tab_count: $tab_count:literal,
+// 			info: $expected_info:expr
+// 		) => {
+// 			let info = any(
+// 				$sample,
+// 				0,
+// 				$tab_count
+// 			);
+// 			assert_eq!(info, $expected_info);
+// 		};
+// 	}
 
-	#[test]
-	fn can_lex_line_comment() {
-		test_any!(b"#abc" (Token::LineComment(b"abc"), 4));
-	}
+// 	#[test]
+// 	fn can_lex_line_comment() {
+// 		test_any!(b"#abc" (Token::LineComment(b"abc"), 4));
+// 	}
 
-	#[test]
-	fn can_lex_block_comment() {
-		let mut expected_lines = Vec::new();
-		expected_lines.push(&b"\tde"[..]);
+// 	#[test]
+// 	fn can_lex_block_comment() {
+// 		let mut expected_lines = Vec::new();
+// 		expected_lines.push(&b"\tde"[..]);
 
-		test_any!(b"###\n\tde\n###" (Token::BlockComment(expected_lines), 11));
-	}
+// 		test_any!(b"###\n\tde\n###" (Token::BlockComment(expected_lines), 11));
+// 	}
 
-	#[test]
-	fn can_lex_simplex() {
-		test_any!(b"efg|" (Token::Simplex(b"efg"), 4));
-	}
+// 	#[test]
+// 	fn can_lex_simplex() {
+// 		test_any!(b"efg|" (Token::Simplex(b"efg"), 4));
+// 	}
 
-	#[test]
-	fn can_lex_complex() {
-		test_any!(b"hi" (Token::Complex(b"hi"), 2));
-	}
+// 	#[test]
+// 	fn can_lex_complex() {
+// 		test_any!(b"hi" (Token::Complex(b"hi"), 2));
+// 	}
 
-	#[test]
-	fn can_lex_attacher() {
-		test_any!(b"jklm:\tn" (Token::Attacher(b"jklm", b"n"), 7));
-	}
+// 	#[test]
+// 	fn can_lex_attacher() {
+// 		test_any!(b"jklm:\tn" (Token::Attacher(b"jklm", b"n"), 7));
+// 	}
 
-	#[test]
-	fn can_lex_line_othertongue() {
-		test_any!(b"= o" (Token::LineOthertongue(b"o"), 3));
-	}
+// 	#[test]
+// 	fn can_lex_line_othertongue() {
+// 		test_any!(b"= o" (Token::LineOthertongue(b"o"), 3));
+// 	}
 
-	#[test]
-	fn can_lex_block_othertongue() {
-		let mut expected_lines = Vec::new();
-		expected_lines.push(&b"pqrs"[..]);
+// 	#[test]
+// 	fn can_lex_block_othertongue() {
+// 		let mut expected_lines = Vec::new();
+// 		expected_lines.push(&b"pqrs"[..]);
 
-		test_any!(b"===\npqrs\n===" (Token::BlockOthertongue(expected_lines), 12));
-	}
+// 		test_any!(b"===\npqrs\n===" (Token::BlockOthertongue(expected_lines), 12));
+// 	}
 
-	#[test]
-	fn can_lex_inlined_line_othertongue() {
-		test_any!(b" = tu" (Token::LineOthertongue(b"tu"), 5));
-	}
-}
+// 	#[test]
+// 	fn can_lex_inlined_line_othertongue() {
+// 		test_any!(b" = tu" (Token::LineOthertongue(b"tu"), 5));
+// 	}
+// }
