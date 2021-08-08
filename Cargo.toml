@@ -5,4 +5,5 @@ authors = ["Kenneth Trecy Tobias <33564322+KennethTrecy@users.noreply.github.com
 edition = "2018"
 
 [dependencies]
+abstract_chearmyp_source = { git = "http://chearmyp.local/abstract_chearmyp_source", tag = "v0.3.0" }
 abstract_chearmyp_token = { git = "http://chearmyp.local/abstract_chearmyp_token", tag = "v0.1.0" }
