@@ -1,4 +1,6 @@
-use crate::{any, Token, TokenQueue};
+use alloc::vec::Vec;
+use crate::abstracts::{ AbstractToken, AbstractTokenQueue };
+use crate::any;
 use crate::count_tabs::count_tabs;
 use crate::special_characters::NEW_LINE;
 
@@ -28,8 +30,11 @@ use crate::special_characters::NEW_LINE;
 /// assert_eq!(queue[4], Token::ScopeLevel(0));
 /// assert_eq!(queue[5], Token::LineComment(b" This is a line comment"));
 /// ```
-pub fn lex(mut src: &[u8]) -> TokenQueue {
-	let mut token_queue = TokenQueue::new();
+pub fn lex<'a, T, U>(mut src: &'a [u8]) -> T
+where
+	T: AbstractTokenQueue<Token = U>,
+	U: AbstractToken<Source = &'a [u8], SourceCollection = Vec<&'a [u8]>> {
+	let mut token_queue = T::new();
 	let mut tab_count = 0;
 	let mut scanned_size = 0;
 	let limit = src.len();
@@ -48,12 +53,12 @@ pub fn lex(mut src: &[u8]) -> TokenQueue {
 		src = &src[new_tab_count..];
 
 		if new_tab_count != tab_count {
-			token_queue.push(Token::ScopeLevel(new_tab_count));
+			token_queue.push_token(U::new_scope_level(new_tab_count));
 			tab_count = new_tab_count;
 		}
 
 		let (token, size) = any(src, 0, tab_count);
-		token_queue.push(token);
+		token_queue.push_token(token);
 
 		scanned_size += size;
 		src = &src[size..];
