@@ -1,4 +1,6 @@
-use crate::token::{Token, TokenInfo};
+use alloc::vec::Vec;
+use crate::abstracts::AbstractToken;
+use crate::TokenInfo;
 use crate::raw_token::RawToken;
 use crate::special_characters::{EQUAL, POUND_SIGN, SPACE};
 use crate::{
@@ -32,7 +34,9 @@ use crate::{
 /// }
 /// assert_eq!(last_index, 5);
 /// ```
-pub fn any(src: &[u8], offset: usize, tab_count: usize) -> TokenInfo {
+pub fn any<'a, T>(src: &'a [u8], offset: usize, tab_count: usize) -> TokenInfo<T>
+where
+	T: AbstractToken<Source = &'a [u8], SourceCollection = Vec<&'a [u8]>> {
 	let original_offset = offset;
 	let mut raw_token;
 	let mut offset = offset;
@@ -40,21 +44,25 @@ pub fn any(src: &[u8], offset: usize, tab_count: usize) -> TokenInfo {
 	macro_rules! lex {
 		(
 			$parser:ident$(($($other_argument:tt),+))?
-			$(unless $raw_token:ident($($content:tt),+) => $block:block)?
-			$(which expects $expected_raw_token:ident($($expected_content:tt),+))?
+			$(unless $raw_token:ident($($content:tt),+) turns into $new_token:ident => $block:block)?
+			$(
+				which expects
+					$expected_raw_token:ident($($expected_content:tt),+)
+					turning into $expected_new_token:ident
+			)?
 		) => {
 			let info = $parser(src, offset, $($($other_argument,)*)?);
 			raw_token = info.0;
 			offset = info.1;
 			$(
 				if let RawToken::$raw_token($($content,)+) = raw_token {
-					let token = Token::$raw_token($($content,)+);
+					let token = AbstractToken::$new_token($($content,)+);
 					(token, offset)
 				} else $block
 			)?
 			$(
 				if let RawToken::$expected_raw_token($($expected_content,)+) = raw_token {
-					let token = Token::$expected_raw_token($($expected_content,)+);
+					let token = AbstractToken::$expected_new_token($($expected_content,)+);
 					(token, offset)
 				} else {
 					panic!("There is an unxpected raw token in lexing the source.");
@@ -66,30 +74,38 @@ pub fn any(src: &[u8], offset: usize, tab_count: usize) -> TokenInfo {
 	if src[0] == POUND_SIGN {
 		lex!{
 			block_comment(tab_count)
-			unless BlockComment(comment) => {
-				lex!{ line_comment which expects LineComment(comment) }
+			unless BlockComment(comment) turns into new_block_comment => {
+				lex!{ line_comment which expects LineComment(comment) turning into new_line_comment }
 			}
 		}
 	} else if src[0] == EQUAL || (src[0] == SPACE && src[1] == EQUAL) {
 		lex!{
 			block_othertongue(tab_count)
-			unless BlockOthertongue(othertongue) => {
-				lex!{ line_othertongue which expects LineOthertongue(othertongue) }
+			unless BlockOthertongue(othertongue) turns into new_block_othertongue => {
+				lex!{
+					line_othertongue
+					which expects LineOthertongue(othertongue)
+					turning into new_line_othertongue
+				}
 			}
 		}
 	} else {
 		lex!{
 			attacher(0)
-			unless Attacher(label, content) => {
+			unless Attacher(label, content) turns into new_attacher => {
 				let search_offset = if offset > 0 { offset - 1 } else { 0 };
 				offset = 0;
 				lex!{
 					simplex(search_offset)
-					unless Simplex(concept) => {
+					unless Simplex(concept) turns into new_simplex => {
 						if offset > 0 { offset -= 1; }
 						let search_offset = offset;
 						offset = original_offset;
-						lex!{ complex(search_offset) which expects Complex(concept) }
+						lex!{
+							complex(search_offset)
+							which expects Complex(concept)
+							turning into new_complex
+						}
 					}
 				}
 			}
