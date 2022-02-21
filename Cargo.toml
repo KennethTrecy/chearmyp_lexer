@@ -1,7 +1,7 @@
 [package]
 name = "chearmyp_lexer"
 version = "0.6.0-dev"
-authors = ["Kenneth Trecy Tobias <33564322+KennethTrecy@users.noreply.github.com>"]
+authors = ["Kenneth Trecy Tobias <web.kennethtobias@gmail.com>"]
 edition = "2018"
 
 [dependencies.abstract_chearmyp_boundary]
