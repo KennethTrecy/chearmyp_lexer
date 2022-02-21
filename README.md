@@ -17,8 +17,8 @@ of Chearmyp token.
 Consider the following Chearmyp text:
 ```
 hello
-   name: ABC
-   # DEF
+	name: ABC
+	# DEF
 ```
 The token queue will represent the text as series of tokens. It will have a complex token (`hello`),
 scope level token (with a value of 1), an attacher token (with `name` label and `ABC` content), and
@@ -27,5 +27,5 @@ a line comment token (with a content of ` DEF`) in that order.
 ### Author
 Coded by Kenneth Trecy Tobias.
 
-[`filled_bare_metal`]: https://github.com/KennethTrecy/feo_template/tree/filled_bare_metal [Feo
-Template]: https://github.com/KennethTrecy/feo_template
+[`filled_bare_metal`]: https://github.com/KennethTrecy/feo_template/tree/filled_bare_metal
+[Feo Template]: https://github.com/KennethTrecy/feo_template
