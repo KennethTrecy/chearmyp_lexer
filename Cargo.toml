@@ -33,5 +33,5 @@ features = ["assertable_token_kind", "vecdeque_token_queue"]
 
 [dev-dependencies.chearmyp_token]
 git = "https://github.com/KennethTrecy/chearmyp_token"
-tag = "v0.6.0"
+tag = "v0.6.1"
 features = ["assertable_token"]
