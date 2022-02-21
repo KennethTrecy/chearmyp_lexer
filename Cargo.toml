@@ -35,3 +35,11 @@ features = ["assertable_token_kind", "vecdeque_token_queue"]
 git = "https://github.com/KennethTrecy/chearmyp_token"
 tag = "v0.6.0"
 features = ["assertable_token"]
+
+[features]
+default = []
+no_std = [
+	"abstract_chearmyp_source/no_std",
+	"abstract_chearmyp_boundary/no_std",
+	"abstract_chearmyp_token/no_std"
+]
