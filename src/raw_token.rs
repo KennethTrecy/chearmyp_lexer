@@ -1,4 +1,3 @@
-
 /// Contains the raw tokens used for lexing only.
 #[derive(Debug, PartialEq)]
 pub enum RawToken<T, U> {
