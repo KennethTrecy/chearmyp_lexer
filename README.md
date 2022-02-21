@@ -11,7 +11,7 @@ The repository was based from [`filled_bare_metal`] branch of [Feo Template].
 
 ## Tokens
 Most functions in the library uses abstract tokens and token queues so it can be used with different
-implementations of Chearmyp token.
+implementations of Chearmyp token and token queues.
 
 ### Author
 Coded by Kenneth Trecy Tobias.
