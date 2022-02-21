@@ -7,6 +7,7 @@
 //! - `no_std`: Uses the `core` crate instead of `std` crate.
 
 #[cfg(feature = "no_std")]
+#[macro_use]
 extern crate alloc;
 
 #[cfg(test)]
