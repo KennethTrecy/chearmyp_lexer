@@ -1,6 +1,7 @@
+use crate::abstracts::{AbstractSource, ComparableAbstractSource, AbstractBoundary};
+use crate::delimeter::Delimeter;
 use crate::raw_token::{RawToken, RawTokenInfo};
 use crate::special_characters::{NEW_LINE, TAB, VERTICAL_LINE};
-use crate::delimeter::Delimeter;
 
 /// Returns the info of recognized simplex and the last index that has been checked from the source.
 ///
@@ -15,35 +16,34 @@ use crate::delimeter::Delimeter;
 ///
 /// ## Examples
 /// ```
-/// use chearmyp_lexer::simplex;
+/// use std::ops::Range;
+/// use chearmyp_lexer::primary_lexers::simplex;
 /// use chearmyp_lexer::RawToken;
 ///
 /// let terminated = b"hello world|";
-/// let (raw_token, last_index) = simplex(&terminated[..], 0, 0);
-/// if let RawToken::Simplex(raw_token) = raw_token {
-/// 	assert_eq!(raw_token, &b"hello world"[..]);
-/// } else {
-/// 	panic!("The returned raw token is not simplex.");
-/// }
+/// let (raw_token, last_index) = simplex
+/// 	::<&[u8], Range<usize>, Vec<Range<usize>>>(&terminated[..], 0, 0);
+/// assert_eq!(raw_token, RawToken::Simplex(0..11));
 /// assert_eq!(last_index, 12);
 ///
 /// let non_simplex = b"hello world";
-/// let (non_simplex, last_index) = simplex(&non_simplex[..], 0, 0);
-/// if let RawToken::Invalid = non_simplex {
-/// 	assert!(true);
-/// } else {
-/// 	panic!("The returned raw token is not invalid.");
-/// }
+/// let (raw_token, last_index) = simplex
+/// 	::<&[u8], Range<usize>, Vec<Range<usize>>>(&non_simplex[..], 0, 0);
+/// assert_eq!(raw_token, RawToken::Invalid);
 /// assert_eq!(last_index, 11);
 /// ```
 ///
 /// [`attacher()`]: ./fn.attacher.html
-pub fn simplex(src: &[u8], slice_offset: usize, mut search_offset: usize) -> RawTokenInfo {
+pub fn simplex<T, U, V>(src: T, slice_offset: usize, mut search_offset: usize)
+-> RawTokenInfo<U, V>
+where
+	T: AbstractSource + ComparableAbstractSource<&'static str>,
+	U: AbstractBoundary<usize> {
 	let start = slice_offset;
 	let end;
 
 	loop {
-		let ending = determine_ending(src, search_offset);
+		let ending = determine_ending(&src, search_offset);
 		match ending {
 			Delimeter::Incorrect => search_offset += 1,
 			Delimeter::Invalid => { return (RawToken::Invalid, search_offset); },
@@ -55,30 +55,33 @@ pub fn simplex(src: &[u8], slice_offset: usize, mut search_offset: usize) -> Raw
 		}
 	}
 
-	(RawToken::Simplex(&src[start..end]), search_offset)
+	(RawToken::Simplex(U::new(start, end)), search_offset)
 }
 
-fn determine_ending(src: &[u8], offset: usize) -> Delimeter {
-	match src.get(offset) {
-		Some(&VERTICAL_LINE) => {
-			if let Some(&next_character) = src.get(offset + 1) {
-				if next_character == NEW_LINE || next_character == TAB {
-					Delimeter::Pad
-				} else {
-					Delimeter::Incorrect
-				}
-			} else {
-				Delimeter::Limit
-			}
-		},
-		Some(&NEW_LINE) | Some(&TAB) => Delimeter::Invalid,
-		Some(_) => Delimeter::Incorrect,
-		None => Delimeter::Invalid
+fn determine_ending<T>(src: &T, offset: usize) -> Delimeter
+where
+	T: AbstractSource + ComparableAbstractSource<&'static str> {
+	if src.is_same_needle_at(offset, VERTICAL_LINE) {
+		let next_offset = offset + 1;
+		if src.is_same_needle_at(next_offset, NEW_LINE) || src.is_same_needle_at(next_offset, TAB) {
+			Delimeter::Pad
+		} else if src.is_empty_at(next_offset) {
+			Delimeter::Limit
+		} else {
+			Delimeter::Incorrect
+		}
+	} else if src.is_same_needle_at(offset, NEW_LINE) || src.is_same_needle_at(offset, TAB) {
+		Delimeter::Invalid
+	} else if src.is_empty_at(offset) {
+		Delimeter::Invalid
+	} else {
+		Delimeter::Incorrect
 	}
 }
 
 #[cfg(test)]
 mod t {
+	use crate::native::{Range, Vec};
 	use super::{RawToken, simplex};
 
 	macro_rules! test_simplex {
@@ -87,7 +90,7 @@ mod t {
 			$expected_token:expr,
 			$expected_consumption:literal
 		) => {
-			let (raw_token, consumed_size) = simplex($sample, 0, 0);
+			let (raw_token, consumed_size) = simplex::<&[u8], Range<usize>, Vec<Range<usize>>>(&&&$sample[..], 0, 0);
 			assert_eq!(raw_token, $expected_token);
 			assert_eq!(consumed_size, $expected_consumption);
 		};
@@ -95,10 +98,10 @@ mod t {
 
 	#[test]
 	fn can_lex() {
-		test_simplex!(b"a|	", RawToken::Simplex(&b"a"[..]), 2);
-		test_simplex!(b"bc|	#", RawToken::Simplex(&b"bc"[..]), 3);
-		test_simplex!(b"def|\n#", RawToken::Simplex(&b"def"[..]), 4);
-		test_simplex!(b"kl|", RawToken::Simplex(&b"kl"[..]), 3);
+		test_simplex!(b"a|	", RawToken::Simplex(0..1), 2);
+		test_simplex!(b"bc|	#", RawToken::Simplex(0..2), 3);
+		test_simplex!(b"def|\n#", RawToken::Simplex(0..3), 4);
+		test_simplex!(b"kl|", RawToken::Simplex(0..2), 3);
 	}
 
 	#[test]

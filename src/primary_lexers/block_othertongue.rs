@@ -1,6 +1,12 @@
-use crate::block::block;
-use crate::raw_token::{RawToken, RawTokenInfo};
+use crate::abstracts::{
+	AbstractSource,
+	AbstractBoundary,
+	ComparableAbstractSource,
+	AbstractBoundaryCollection
+};
+use crate::helpers::block;
 use crate::special_characters::EQUAL;
+use crate::raw_token::{RawToken, RawTokenInfo};
 
 /// Returns the info of recognized block othertongue and its probably last seen index in the source.
 ///
@@ -14,31 +20,30 @@ use crate::special_characters::EQUAL;
 ///
 /// ## Examples
 /// ```
-/// use chearmyp_lexer::block_othertongue;
+/// use std::ops::Range;
+/// use chearmyp_lexer::primary_lexers::block_othertongue;
 /// use chearmyp_lexer::RawToken;
 ///
 /// let terminated = b"===\n\thello world\n===\n";
-/// let (block, last_index) = block_othertongue(&terminated[..], 0, 0);
-/// if let RawToken::BlockOthertongue(othertongue) = block {
-/// 	assert_eq!(othertongue, vec![&b"\thello world"[..]]);
-/// } else {
-/// 	panic!("The returned raw token is not block othertongue.");
-/// }
+/// let (raw_token, last_index) = block_othertongue
+/// 	::<&[u8], Range<usize>, Vec<Range<usize>>>(&terminated[..], 0, 0);
+/// assert_eq!(raw_token, RawToken::BlockOthertongue(vec![4..16]));
 /// assert_eq!(last_index, 21);
 ///
 /// let non_othertongue = b"hello world";
-/// let (raw_token, last_index) = block_othertongue(&non_othertongue[..], 0, 0);
-/// if let RawToken::Invalid = raw_token {
-/// 	assert!(true);
-/// } else {
-/// 	panic!("The returned raw token is not invalid.");
-/// }
+/// let (raw_token, last_index) = block_othertongue
+/// 	::<&[u8], Range<usize>, Vec<Range<usize>>>(&non_othertongue[..], 0, 0);
+/// assert_eq!(raw_token, RawToken::Invalid);
 /// assert_eq!(last_index, 0);
 /// ```
-pub fn block_othertongue(src: &[u8], offset: usize, tab_count: usize) -> RawTokenInfo {
+pub fn block_othertongue<T, U, V>(src: T, offset: usize, tab_count: usize) -> RawTokenInfo<U, V>
+where
+	T: AbstractSource + ComparableAbstractSource<&'static str> + Clone,
+	U: AbstractBoundary<usize>,
+	V: AbstractBoundaryCollection<usize, U> {
 	let block = block(src, offset, tab_count, EQUAL);
-	if let (RawToken::Block(lines), last_seen_index) = block {
-		(RawToken::BlockOthertongue(lines), last_seen_index)
+	if let (RawToken::Block(lines), offset) = block {
+		(RawToken::BlockOthertongue(lines), offset)
 	} else {
 		block
 	}
@@ -46,11 +51,12 @@ pub fn block_othertongue(src: &[u8], offset: usize, tab_count: usize) -> RawToke
 
 #[cfg(test)]
 mod t {
+	use crate::native::{Range, Vec};
 	use super::{RawToken, block_othertongue};
 
 	macro_rules! BlockOthertongue {
-		($($raw_token:literal)*) => {
-			create_block!(BlockOthertongue $($raw_token)*)
+		($($raw_token:expr),*) => {
+			create_block!(BlockOthertongue $($raw_token),*)
 		};
 	}
 
@@ -61,31 +67,31 @@ mod t {
 		valid cases: [
 			can_lex_empty_othertongue
 			with sample b"===\n===" and tab count 0
-			expecting [] with consumed size of 7 bytes.
+			expecting [7..7] with consumed size of 7 bytes.
 
 			can_lex_othertongue_with_single_line
 			with sample b"===\na\n===" and tab count 0
-			expecting [b"a"] with consumed size of 9 bytes.
+			expecting [4..5] with consumed size of 9 bytes.
 
 			can_lex_othertongue_with_indented_and_single_line
 			with sample b"===\n\tbc\n\t===" and tab count 1
-			expecting [b"\tbc"] with consumed size of 12 bytes.
+			expecting [4..7] with consumed size of 12 bytes.
 
 			can_lex_othertongue_with_multiple_indented_lines
 			with sample b"===\n\td\n\t\te\n\t\t===" and tab count 2
-			expecting [b"\td" b"\t\te"] with consumed size of 16 bytes.
+			expecting [4..6, 7..10] with consumed size of 16 bytes.
 
 			can_lex_othertongue_with_empty_line
 			with sample b"===\nf\n\n===" and tab count 0
-			expecting [b"f" b""] with consumed size of 10 bytes.
+			expecting [4..5, 6..6] with consumed size of 10 bytes.
 
 			can_lex_othertongue_with_empty_lines
 			with sample b"===\n\n\n\n\n\t===" and tab count 1
-			expecting [b"" b"" b"" b""] with consumed size of 12 bytes.
+			expecting [4..4, 5..5, 6..6, 7..7] with consumed size of 12 bytes.
 
 			can_lex_othertongue_with_empty_line_and_indented_line
 			with sample b"===\n\tg\n\nh\n\t===" and tab count 1
-			 expecting [b"\tg" b"" b"h"] with consumed size of 14 bytes.
+			 expecting [4..6, 7..7, 8..9] with consumed size of 14 bytes.
 		]
 
 		invalid cases: [

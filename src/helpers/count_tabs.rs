@@ -1,3 +1,4 @@
+use crate::abstracts::{AbstractSource, ComparableAbstractSource};
 use crate::special_characters::TAB;
 
 /// Returns the number of initial tabs in the source.
@@ -5,28 +6,29 @@ use crate::special_characters::TAB;
 /// It needs an array of bytes as the first argument (known as source), and the previous number of
 /// tabs worked on (known as old tab count). If it is the first time to check the number of initial
 /// tabs, set the old tab count to 0.
-pub fn count_tabs(src: &[u8], old_tab_count: usize) -> usize {
+pub fn count_tabs<T>(src: T, old_tab_count: usize) -> usize
+where
+	T: AbstractSource + ComparableAbstractSource<&'static str> {
 	let mut new_tab_count = old_tab_count;
 
 	loop {
-		match src.get(new_tab_count) {
-			Some(&TAB) => new_tab_count += 1,
-			Some(_) => {
-				if new_tab_count > 0 {
-					match src[new_tab_count - 1] {
-						TAB => break,
-						_ => new_tab_count -= 1
-					}
-				} else {
+		if src.is_same_needle_at(new_tab_count, TAB) {
+			new_tab_count += 1;
+		} else if src.is_empty_at(new_tab_count) {
+			if new_tab_count > 0 {
+				new_tab_count -= 1
+			} else {
+				break;
+			}
+		} else {
+			if new_tab_count > 0 {
+				if src.is_same_needle_at(new_tab_count - 1, TAB) {
 					break;
-				}
-			},
-			None => {
-				if new_tab_count > 0 {
-					new_tab_count -= 1
 				} else {
-					break;
+					new_tab_count -= 1;
 				}
+			} else {
+				break;
 			}
 		}
 	}

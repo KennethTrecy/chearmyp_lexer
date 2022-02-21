@@ -1,21 +1,20 @@
-use alloc::vec::Vec;
 
 /// Contains the raw tokens used for lexing only.
 #[derive(Debug, PartialEq)]
-pub enum RawToken<'a> {
+pub enum RawToken<T, U> {
 	Empty,
 	Invalid,
 	ScopeLevel(usize),
-	Block(Vec<&'a [u8]>),
-	LineComment(&'a [u8]),
-	BlockComment(Vec<&'a [u8]>),
-	Simplex(&'a [u8]),
-	Complex(&'a [u8]),
-	Attacher(&'a [u8], &'a [u8]),
-	LineOthertongue(&'a [u8]),
-	BlockOthertongue(Vec<&'a [u8]>)
+	Block(U),
+	LineComment(T),
+	BlockComment(U),
+	Simplex(T),
+	Complex(T),
+	Attacher(T, T),
+	LineOthertongue(T),
+	BlockOthertongue(U)
 }
 
 /// Contains the extracted raw token and its last index occupied in the source.
 /// This raw token is used as return value for most lexers.
-pub type RawTokenInfo<'a> = (RawToken<'a>, usize);
+pub type RawTokenInfo<U, V> = (RawToken<U, V>, usize);

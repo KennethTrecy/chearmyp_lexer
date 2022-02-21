@@ -1,15 +1,61 @@
-#![no_std]
+#![cfg_attr(feature = "no_std", no_std)]
+
+//! # Chearmyp Lexer
+//! Please read the README.md for more information.
+//!
+//! ## Features available
+//! - `no_std`: Uses the `core` crate instead of `std` crate.
+
+#[cfg(feature = "no_std")]
 extern crate alloc;
+
+#[cfg(test)]
+mod native {
+	#[cfg(feature = "no_std")]
+	pub use core::ops::Range;
+
+	#[cfg(feature = "no_std")]
+	pub use alloc::{
+		vec::Vec,
+		collections::VecDeque
+	};
+
+	#[cfg(not(feature = "no_std"))]
+	pub use std::{
+		vec::Vec,
+		ops::Range,
+		collections::VecDeque
+	};
+}
 
 mod abstracts {
 	pub use abstract_chearmyp_source::{
 		AbstractSource,
-		AbstractSourceCollection
+		AbstractSourceCollection,
+		ComparableAbstractSource
 	};
+
+	pub use abstract_chearmyp_boundary::{
+		AbstractBoundary,
+		AbstractBoundaryCollection
+	};
+
 	pub use abstract_chearmyp_token::{
 		AbstractToken,
-		AbstractTokenQueue
+		AbstractTokenQueue,
+		AbstractScopeLevelToken
 	};
+
+	#[cfg(test)]
+	pub use abstract_chearmyp_token::{
+		SimpleAbstractToken
+	};
+}
+
+mod token {
+	#[cfg(test)]
+	pub use chearmyp_token::Token;
+	pub use abstract_chearmyp_token::TokenKind;
 }
 
 /// Contains macros useful in tests
@@ -27,55 +73,28 @@ mod raw_token;
 /// Contains different characters needed to be recognized by the different lexers.
 pub mod special_characters;
 
-/// Contains `find_line_ending()`.
-mod find_line_ending;
-
-/// Contains `line_comment()` lexer.
-mod line_comment;
-
-/// Contains `block_comment()` lexer.
-mod block_comment;
-
-/// Contains `simplex()` lexer.
-mod simplex;
-
-/// Contains `complex()` lexer and `determine_ending()`.
-mod complex;
-
-/// Contains `attacher()` lexer.
-mod attacher;
-
-/// Contains `line_othertongue()` lexer.
-mod line_othertongue;
-
-/// Contains `block()` lexer.
-mod block;
-
-/// Contains `block_othertongue()` lexer.
-mod block_othertongue;
-
 /// Contains types of delimeter that lexers search for.
 mod delimeter;
 
-/// Contains `any()` lexer.
-mod any;
+/// Contains helper functions
+pub mod helpers;
 
-/// Contains `count_tabs()` counter.
-mod count_tabs;
+/// Contains the lexers which create token usable for lexing and parsing.
+pub mod secondary_lexers;
 
-/// Contains the general lexer.
-mod lex;
+/// Contains the lexers which create token usable for lexing only.
+pub mod primary_lexers;
 
-pub use block::block;
-pub use find_line_ending::find_line_ending;
-pub use line_comment::line_comment;
-pub use block_comment::block_comment;
-pub use simplex::simplex;
-pub use complex::complex;
-pub use attacher::attacher;
-pub use line_othertongue::line_othertongue;
-pub use block_othertongue::block_othertongue;
-pub use any::any;
 pub use raw_token::RawToken;
 pub use token_info::TokenInfo;
-pub use lex::lex;
+pub use secondary_lexers::{lex, any};
+
+use primary_lexers::{
+	complex,
+	simplex,
+	attacher,
+	line_comment,
+	block_comment,
+	line_othertongue,
+	block_othertongue
+};
