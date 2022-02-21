@@ -2,7 +2,7 @@
 name = "chearmyp_lexer"
 version = "0.6.0-dev"
 authors = ["Kenneth Trecy Tobias <web.kennethtobias@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies.abstract_chearmyp_boundary]
 git = "https://github.com/KennethTrecy/abstract_chearmyp_boundary"
