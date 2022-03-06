@@ -7,7 +7,7 @@ This library represents the source as a queue of tokens.
 It was in a repository with the parser library. Yet it has been forked as some possible use cases
 may not need a parser.
 
-The repository was based from [`filled_bare_metal`] branch of [Feo Template].
+Some parts of the repository was based from [`filled_bare_metal`] branch of [Feo Template].
 
 ## Tokens
 Most functions in the library uses abstract tokens and token queues so it can be used with different
