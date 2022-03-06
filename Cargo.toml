@@ -1,6 +1,6 @@
 [package]
 name = "chearmyp_lexer"
-version = "0.7.0-dev"
+version = "0.7.0"
 authors = ["Kenneth Trecy Tobias <web.kennethtobias@gmail.com>"]
 edition = "2021"
 
