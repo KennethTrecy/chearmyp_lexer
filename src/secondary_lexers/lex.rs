@@ -189,11 +189,35 @@ mod t {
 	}
 
 	#[test]
-	fn can_lex_empty_scopes() {
+	fn can_lex_initial_empty_scopes() {
 		let source = b"\t\t";
 		let mut expected_token_queue = VecDeque::new();
 		expected_token_queue.push_token(
 			Token::<Range<usize>, Vec<Range<usize>>>::new_scope_level(2)
+		);
+
+		let token_queue: VecDeque<
+			Token<Range<usize>, Vec<Range<usize>>>
+		> = lex(&&source[..], VecDeque::new());
+
+		assert_eq!(token_queue, expected_token_queue);
+	}
+
+	#[test]
+	fn can_lex_some_empty_scopes() {
+		let source = b"a\t\t\nb";
+		let mut expected_token_queue = VecDeque::new();
+		expected_token_queue.push_token(
+			Token::<Range<usize>, Vec<Range<usize>>>::new_simplex(0..1)
+		);
+		expected_token_queue.push_token(
+			Token::<Range<usize>, Vec<Range<usize>>>::new_scope_level(2)
+		);
+		expected_token_queue.push_token(
+			Token::<Range<usize>, Vec<Range<usize>>>::new_scope_level(0)
+		);
+		expected_token_queue.push_token(
+			Token::<Range<usize>, Vec<Range<usize>>>::new_complex(3..4)
 		);
 
 		let token_queue: VecDeque<
