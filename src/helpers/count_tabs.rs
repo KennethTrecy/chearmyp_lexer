@@ -15,11 +15,10 @@ where
 		if src.is_same_needle_at(new_tab_count, TAB) {
 			new_tab_count += 1;
 		} else if src.is_empty_at(new_tab_count) {
-			if new_tab_count > 0 {
-				new_tab_count -= 1
-			} else {
-				break;
+			if old_tab_count == new_tab_count {
+				new_tab_count = 0;
 			}
+			break;
 		} else {
 			if new_tab_count > 0 {
 				if src.is_same_needle_at(new_tab_count - 1, TAB) {
@@ -45,6 +44,17 @@ mod t {
 		let sample = b"a";
 		let old_tab_count = 0;
 		let expected_new_tab_count = 0;
+
+		let count = count_tabs(&sample[..], old_tab_count);
+
+		assert_eq!(count, expected_new_tab_count);
+	}
+
+	#[test]
+	fn can_increase_count_on_first_time() {
+		let sample = b"\t";
+		let old_tab_count = 0;
+		let expected_new_tab_count = 1;
 
 		let count = count_tabs(&sample[..], old_tab_count);
 
