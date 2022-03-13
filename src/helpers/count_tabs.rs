@@ -93,4 +93,15 @@ mod t {
 
 		assert_eq!(count, expected_new_tab_count);
 	}
+
+	#[test]
+	fn can_count_dramatically_increased_tabs() {
+		let sample = b"\t\t\tfg";
+		let old_tab_count = 0;
+		let expected_new_tab_count = 3;
+
+		let count = count_tabs(&sample[..], old_tab_count);
+
+		assert_eq!(count, expected_new_tab_count);
+	}
 }
