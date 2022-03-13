@@ -8,14 +8,14 @@ Add it to the dependencies:
 ```
 [dependencies.chearmyp_lexer]
 git = "https://github.com/KennethTrecy/chearmyp_lexer"
-tag = "v0.7.0"
+tag = "v0.7.1"
 ```
 
 You may also activate all the features:
 ```
 [dependencies.chearmyp_lexer]
 git = "https://github.com/KennethTrecy/chearmyp_lexer"
-tag = "v0.7.0"
+tag = "v0.7.1"
 features = ["no_std"]
 ```
 
