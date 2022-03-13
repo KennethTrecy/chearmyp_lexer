@@ -193,7 +193,7 @@ mod t {
 		let source = b"\t\t";
 		let mut expected_token_queue = VecDeque::new();
 		expected_token_queue.push_token(
-			Token::<Range<usize>, Vec<Range<usize>>>::new_line_comment(0..2)
+			Token::<Range<usize>, Vec<Range<usize>>>::new_scope_level(2)
 		);
 
 		let token_queue: VecDeque<
