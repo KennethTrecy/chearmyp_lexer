@@ -64,10 +64,10 @@ where
 
 		let (token, last_seen_index) = any(src.clone(), scanned_size, tab_count, is_in_new_line);
 		if W::kind(&token) == TokenKind::ScopeLevel {
-			let scope_level = X::from(token);
-			let new_scope_level = X::level(&scope_level);
+			let scope_level_token = X::from(token);
+			let new_scope_level = X::level(&scope_level_token);
 			tab_count = new_scope_level;
-			let token = W::from(scope_level);
+			let token = W::from(scope_level_token);
 			token_queue.push_token(token);
 		} else {
 			token_queue.push_token(token);
