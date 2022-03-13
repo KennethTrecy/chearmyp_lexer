@@ -217,7 +217,7 @@ mod t {
 			Token::<Range<usize>, Vec<Range<usize>>>::new_scope_level(0)
 		);
 		expected_token_queue.push_token(
-			Token::<Range<usize>, Vec<Range<usize>>>::new_complex(3..4)
+			Token::<Range<usize>, Vec<Range<usize>>>::new_complex(5..6)
 		);
 
 		let token_queue: VecDeque<
