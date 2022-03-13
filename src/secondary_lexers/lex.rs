@@ -205,7 +205,7 @@ mod t {
 
 	#[test]
 	fn can_lex_some_empty_scopes() {
-		let source = b"a\t\t\nb";
+		let source = b"a\n\t\t\nb";
 		let mut expected_token_queue = VecDeque::new();
 		expected_token_queue.push_token(
 			Token::<Range<usize>, Vec<Range<usize>>>::new_simplex(0..1)
