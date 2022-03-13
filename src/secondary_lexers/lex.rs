@@ -208,7 +208,7 @@ mod t {
 		let source = b"a\n\t\t\nb";
 		let mut expected_token_queue = VecDeque::new();
 		expected_token_queue.push_token(
-			Token::<Range<usize>, Vec<Range<usize>>>::new_simplex(0..1)
+			Token::<Range<usize>, Vec<Range<usize>>>::new_complex(0..1)
 		);
 		expected_token_queue.push_token(
 			Token::<Range<usize>, Vec<Range<usize>>>::new_scope_level(2)
