@@ -53,7 +53,7 @@ where
 	Y: AbstractTokenQueue<usize, U, usize, U, V, W> {
 	let mut tab_count = 0;
 	let mut scanned_size = 0;
-	let mut is_in_new_line = false;
+	let mut is_in_new_line = true;
 
 	while !src.is_empty_at(scanned_size) {
 		if src.is_same_needle_at(scanned_size, NEW_LINE) {
