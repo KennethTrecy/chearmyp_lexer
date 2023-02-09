@@ -16,7 +16,8 @@ use crate::{
 	line_comment,
 	block_comment,
 	line_othertongue,
-	block_othertongue};
+	block_othertongue
+};
 
 /// Returns the info of first recognized token and its probably last seen index in the source.
 ///
@@ -42,7 +43,8 @@ use crate::{
 /// assert_eq!(token, Token::new_complex(0..5));
 /// assert_eq!(last_index, 5);
 /// ```
-pub fn any<T, U, V, W>(src: T, offset: usize, tab_count: usize, is_in_new_line: bool) -> TokenInfo<W>
+pub fn any<T, U, V, W>(src: T, offset: usize, tab_count: usize, is_in_new_line: bool)
+-> TokenInfo<W>
 where
 	T: AbstractSource + ComparableAbstractSource<&'static str> + Clone,
 	U: AbstractBoundary<usize>,
@@ -86,7 +88,9 @@ where
 					let token = W::$expected_new_token($($expected_content,)+);
 					(token, offset)
 				} else {
-					panic!("There is an unexpected raw token in lexing the source.");
+					let effect = "There is an unexpected raw token in lexing found in the source.";
+					let cause = "This is possibly due to developer error.";
+					panic!("{} {}", effect, cause);
 				}
 			)?
 		};
@@ -105,8 +109,34 @@ where
 			unless BlockOthertongue(othertongue) turns into new_block_othertongue => {
 				lex!{
 					line_othertongue
-					which expects LineOthertongue(othertongue)
-					turning into new_line_othertongue
+					unless LineOthertongue(othertongue) turns into new_line_othertongue => {
+						lex!{
+							attacher(offset)
+							unless Attacher(label, content) turns into new_attacher => {
+								let search_offset = if offset > tabbed_offset {
+									offset - 1
+								} else {
+									tabbed_offset
+								};
+								let slice_start_offset = tabbed_offset;
+								offset = slice_start_offset;
+
+								lex!{
+									simplex(search_offset)
+									unless Simplex(concept) turns into new_simplex => {
+										let search_offset = offset;
+										let slice_start_offset = tabbed_offset;
+										offset = slice_start_offset;
+										lex!{
+											complex(search_offset)
+											which expects Complex(concept)
+											turning into new_complex
+										}
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -149,13 +179,6 @@ mod t {
 	use super::any;
 
 	macro_rules! test_any {
-		($source:literal $expected_info:expr) => {
-			test_any!{
-				source: $source,
-				tab_count: 0,
-				info: $expected_info
-			}
-		};
 		(
 			source: $source:expr,
 			expected token: $token_constructor:ident($($token_content:expr),+),
@@ -236,14 +259,23 @@ mod t {
 	}
 
 	#[test]
+	fn can_lex_empty_line_comment() {
+		test_any!(
+			source: b"#",
+			expected token: new_line_comment(1..1),
+			expected last seen index: 1
+		);
+	}
+
+	#[test]
 	fn can_lex_block_comment() {
 		let mut expected_lines = Vec::new();
 		expected_lines.push(4..7);
 
 		test_any!(
 			source: b"###\n\tde\n###",
-				expected token: new_block_comment(expected_lines),
-				expected last seen index: 11
+			expected token: new_block_comment(expected_lines),
+			expected last seen index: 11
 		);
 	}
 
@@ -280,6 +312,15 @@ mod t {
 			source: b"= o",
 			expected token: new_line_othertongue(2..3),
 			expected last seen index: 3
+		);
+	}
+
+	#[test]
+	fn can_lex_invalid_line_othertongue_into_complex() {
+		test_any!(
+			source: b"=o",
+			expected token: new_complex(0..2),
+			expected last seen index: 2
 		);
 	}
 
